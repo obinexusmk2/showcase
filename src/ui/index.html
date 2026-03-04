@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drift Panel</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --state-red: #ef4444;
+        --state-orange: #f97316;
+        --state-yellow: #eab308;
+        --state-green: #22c55e;
+        --surface: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --surface: #111827;
+          --text: #f9fafb;
+          --muted: #9ca3af;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: radial-gradient(circle at top, #e5e7eb 0%, #f3f4f6 40%, #f9fafb 100%);
+        color: var(--text);
+      }
+
+      #app {
+        width: min(640px, 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app" aria-live="polite"></main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
