@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMUKO Fluid - Holographic Drift System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --drift-red: #ef4444;
+            --drift-orange: #f97316;
+            --drift-yellow: #eab308;
+            --drift-green: #22c55e;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --surface-dark: #0f0f1f;
+            --surface-light: #1a1a2e;
+            --accent: #667eea;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1f 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Canvas Layers */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 50%, #1a1a2e 0%, #0f0f1f 100%);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+        }
+
+        #backgroundCanvas {
+            z-index: 1;
+        }
+
+        #foregroundCanvas {
+            z-index: 2;
+        }
+
+        /* UI Overlay */
+        .ui-overlay {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            pointer-events: auto;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 12;
+            text-align: center;
+            pointer-events: auto;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--accent), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* Drift State Indicator */
+        .drift-indicator {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 15;
+            background: rgba(15, 15, 31, 0.9);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            min-width: 250px;
+        }
+
+        .drift-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .drift-state {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .drift-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .drift-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Features Section */
+        .features {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 15;
+            background: rgba(15, 15, 31, 0.9);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            max-width: 300px;
+        }
+
+        .feature-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--accent);
+        }
+
+        .feature-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .drift-indicator {
+                bottom: 1rem;
+                right: 1rem;
+                min-width: 220px;
+            }
+
+            .features {
+                bottom: 1rem;
+                left: 1rem;
+                max-width: 250px;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Container -->
+    <div class="canvas-container">
+        <canvas id="backgroundCanvas"></canvas>
+        <canvas id="foregroundCanvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div class="ui-overlay">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">🌀</div>
+                        <span>MMUKO Fluid</span>
+                    </div>
+                    <nav>
+                        <ul class="nav-links">
+                            <li><a href="#features">Features</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#demo">Demo</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <div class="hero floating">
+                <h1>Phenomenological Drift System</h1>
+                <p>Experience weighted graph visualization with real-time state classification. A holographic interface for the future.</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="window.location.href='/src/ui/index.html'">Launch Demo</button>
+                    <button class="btn btn-secondary" onclick="toggleInfo()">Learn More</button>
+                </div>
+            </div>
+
+            <!-- Drift State Indicator -->
+            <div class="drift-indicator">
+                <div class="drift-label">Live Drift State</div>
+                <div class="drift-state">
+                    <div class="drift-swatch" id="driftSwatch"></div>
+                    <span id="driftLabel">LOADING</span>
+                </div>
+                <div class="drift-info" id="driftInfo">Initializing...</div>
+            </div>
+
+            <!-- Features Panel -->
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-title">⚡ Motion Classification</div>
+                    <div class="feature-desc">Real-time R³ drift detection with observer-frame analysis</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🎯 Weighted Interpolation</div>
+                    <div class="feature-desc">2/3:1/3 blending for smooth UI transitions</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🔮 Phenomenological</div>
+                    <div class="feature-desc">Person-to-person feeling transfer with 95.4% coherence</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vector Module -->
+    <script>
+        var Vector;
+        (function (Vector) {
+            "use strict";
+            var Vec2 = function (x, y) {
+                this.x = x;
+                this.y = y;
+            };
+            Object.defineProperty(Vec2, "I", {
+                get: function () {
+                    return new Vec2(1, 0);
+                }
+            });
+            Object.defineProperty(Vec2, "J", {
+                get: function () {
+                    return new Vec2(0, 1);
+                }
+            });
+            Vec2.prototype.add = function (v) {
+                if (v instanceof Vec2) {
+                    this.x += v.x;
+                    this.y += v.y;
+                } else {
+                    this.x += v;
+                    this.y += v;
+                }
+                return this;
+            };
+            Vec2.prototype.sub = function (v) {
+                if (v instanceof Vec2) {
+                    this.x -= v.x;
+                    this.y -= v.y;
+                } else {
+                    this.x -= v;
+                    this.y -= v;
+                }
+                return this;
+            };
+            Vec2.prototype.dot = function (v) {
+                if (v instanceof Vec2) {
+                    this.x *= v.x;
+                    this.y *= v.y;
+                } else {
+                    this.x *= v;
+                    this.y *= v;
+                }
+                return this;
+            };
+            Vec2.prototype.clone = function () {
+                return new Vec2(this.x, this.y);
+            };
+            Vec2.prototype.length = function () {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            };
+            Vec2.prototype.normalize = function () {
+                var len = this.length();
+                this.x /= len;
+                this.y /= len;
+                return this;
+            };
+            Vector["Vec2"] = Vec2;
+
+            var Vec3 = function (x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            };
+            Object.defineProperty(Vec3, "I", {
+                get: function () {
+                    return new Vec3(1, 0, 0);
+                }
+            });
+            Object.defineProperty(Vec3, "J", {
+                get: function () {
+                    return new Vec3(0, 1, 0);
+                }
+            });
+            Object.defineProperty(Vec3, "K", {
+                get: function () {
+                    return new Vec3(0, 0, 1);
+                }
+            });
+            Vec3.prototype.add = function (v) {
+                if (v instanceof Vec3) {
+                    this.x += v.x;
+                    this.y += v.y;
+                    this.z += v.z;
+                } else {
+                    this.x += v;
+                    this.y += v;
+                    this.z += v;
+                }
+                return this;
+            };
+            Vec3.prototype.sub = function (v) {
+                if (v instanceof Vec3) {
+                    this.x -= v.x;
+                    this.y -= v.y;
+                    this.z -= v.z;
+                } else {
+                    this.x -= v;
+                    this.y -= v;
+                    this.z -= v;
+                }
+                return this;
+            };
+            Vec3.prototype.clone = function () {
+                return new Vec3(this.x, this.y, this.z);
+            };
+            Vec3.prototype.dot = function (v) {
+                if (v instanceof Vec3) {
+                    return this.x * v.x + this.y * v.y + this.z * v.z;
+                } else {
+                    return this.x * v + this.y * v + this.z * v;
+                }
+            };
+            Vec3.prototype.cross = function (v) {
+                var x = this.x;
+                var y = this.y;
+                var z = this.z;
+                this.x = y * v.z - z * v.y;
+                this.y = z * v.x - x * v.z;
+                this.z = x * v.y - y * v.x;
+                return this;
+            };
+            Vec3.prototype.length = function () {
+                return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+            };
+            Vec3.prototype.normalize = function () {
+                var len = this.length();
+                this.x /= len;
+                this.y /= len;
+                this.z /= len;
+                return this;
+            };
+            Vec3.prototype.rotateX = function (angle) {
+                var y = this.y;
+                var z = this.z;
+                this.y = y * Math.cos(angle) - z * Math.sin(angle);
+                this.z = z * Math.cos(angle) + y * Math.sin(angle);
+                return this;
+            };
+            Vec3.prototype.rotateY = function (angle) {
+                var x = this.x;
+                var z = this.z;
+                this.x = x * Math.cos(angle) - z * Math.sin(angle);
+                this.z = z * Math.cos(angle) + x * Math.sin(angle);
+                return this;
+            };
+            Vec3.prototype.rotateZ = function (angle) {
+                var x = this.x;
+                var y = this.y;
+                this.x = x * Math.cos(angle) - y * Math.sin(angle);
+                this.y = y * Math.cos(angle) + x * Math.sin(angle);
+                return this;
+            };
+            Vector["Vec3"] = Vec3;
+        })(typeof Vector === "undefined" ? (Vector = {}) : Vector);
+    </script>
+
+    <!-- HemiSphere -->
+    <script>
+        var HemiSphere = function ({ origin, radius, detail, texture }) {
+            this.origin = origin || new Vector.Vec3(0, 0, 0);
+            this.radius = radius || 50;
+            this.vertices = [];
+            this.detail = detail || 10;
+            this.faces = [];
+            this.uvs = [];
+            this.normals = [];
+            this.init();
+        };
+
+        HemiSphere.prototype.init = function () {
+            var vertices = this.vertices;
+            var faces = this.faces;
+            var normals = this.normals;
+            var radius = this.radius;
+            var detail = this.detail;
+            var v = new Vector.Vec3(0, 0, 0);
+            var n = new Vector.Vec3(0, 0, 0);
+
+            for (var i = 0; i < detail; i++) {
+                var theta = (Math.PI * i) / detail;
+                for (var j = 0; j < detail; j++) {
+                    var phi = (Math.PI * j) / detail;
+                    v.x = radius * Math.sin(theta) * Math.cos(phi);
+                    v.y = radius * Math.sin(theta) * Math.sin(phi);
+                    v.z = radius * Math.cos(theta);
+                    vertices.push(v.x, v.y, v.z);
+                }
+            }
+
+            for (var i = 0; i < detail - 1; i++) {
+                for (var j = 0; j < detail - 1; j++) {
+                    var a = i * detail + j;
+                    var b = (i + 1) * detail + j;
+                    var c = (i + 1) * detail + (j + 1);
+                    var d = i * detail + (j + 1);
+                    faces.push(a, b, c, a, c, d);
+                }
+            }
+
+            for (var i = 0; i < detail; i++) {
+                var theta = (Math.PI * i) / detail;
+                for (var j = 0; j < detail; j++) {
+                    var phi = (Math.PI * j) / detail;
+                    n.x = Math.sin(theta) * Math.cos(phi);
+                    n.y = Math.sin(theta) * Math.sin(phi);
+                    n.z = Math.cos(theta);
+                    normals.push(n.x, n.y, n.z);
+                }
+            }
+        };
+
+        HemiSphere.prototype.drawWireframe = function (context) {
+            var faces = this.faces;
+            var vertices = this.vertices;
+            var origin = this.origin;
+            var v1 = new Vector.Vec3(0, 0, 0);
+            var v2 = new Vector.Vec3(0, 0, 0);
+            var v3 = new Vector.Vec3(0, 0, 0);
+
+            context.strokeStyle = "#667eea";
+            context.lineWidth = 1;
+            context.globalAlpha = 0.7;
+
+            for (var i = 0; i < faces.length; i += 3) {
+                var a = faces[i];
+                var b = faces[i + 1];
+                var c = faces[i + 2];
+
+                v1.set(vertices[a * 3], vertices[a * 3 + 1], vertices[a * 3 + 2]);
+                v2.set(vertices[b * 3], vertices[b * 3 + 1], vertices[b * 3 + 2]);
+                v3.set(vertices[c * 3], vertices[c * 3 + 1], vertices[c * 3 + 2]);
+
+                v1.add(origin);
+                v2.add(origin);
+                v3.add(origin);
+
+                context.beginPath();
+                context.moveTo(v1.x, v1.y);
+                context.lineTo(v2.x, v2.y);
+                context.lineTo(v3.x, v3.y);
+                context.lineTo(v1.x, v1.y);
+                context.stroke();
+            }
+
+            context.globalAlpha = 1;
+        };
+
+        HemiSphere.prototype.rotateX = function (angle) {
+            var vertices = this.vertices;
+            var normals = this.normals;
+            var v = new Vector.Vec3(0, 0, 0);
+            var n = new Vector.Vec3(0, 0, 0);
+
+            for (var i = 0; i < vertices.length; i += 3) {
+                v.set(vertices[i], vertices[i + 1], vertices[i + 2]);
+                n.set(normals[i], normals[i + 1], normals[i + 2]);
+                v.rotateX(angle);
+                n.rotateX(angle);
+                vertices[i] = v.x;
+                vertices[i + 1] = v.y;
+                vertices[i + 2] = v.z;
+                normals[i] = n.x;
+                normals[i + 1] = n.y;
+                normals[i + 2] = n.z;
+            }
+        };
+
+        HemiSphere.prototype.rotateY = function (angle) {
+            var vertices = this.vertices;
+            var normals = this.normals;
+            var v = new Vector.Vec3(0, 0, 0);
+            var n = new Vector.Vec3(0, 0, 0);
+
+            for (var i = 0; i < vertices.length; i += 3) {
+                v.set(vertices[i], vertices[i + 1], vertices[i + 2]);
+                n.set(normals[i], normals[i + 1], normals[i + 2]);
+                v.rotateY(angle);
+                n.rotateY(angle);
+                vertices[i] = v.x;
+                vertices[i + 1] = v.y;
+                vertices[i + 2] = v.z;
+                normals[i] = n.x;
+                normals[i + 1] = n.y;
+                normals[i + 2] = n.z;
+            }
+        };
+    </script>
+
+    <!-- Main Application -->
+    <script>
+        // Initialize canvases
+        const bgCanvas = document.getElementById('backgroundCanvas');
+        const fgCanvas = document.getElementById('foregroundCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const fgCtx = fgCanvas.getContext('2d');
+
+        function resizeCanvases() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            fgCanvas.width = window.innerWidth;
+            fgCanvas.height = window.innerHeight;
+        }
+
+        resizeCanvases();
+        window.addEventListener('resize', resizeCanvases);
+
+        // Create HemiSphere
+        const sphere = new HemiSphere({
+            radius: 150,
+            origin: new Vector.Vec3(window.innerWidth / 2, window.innerHeight / 2, 0),
+            detail: 12
+        });
+
+        // Drift State
+        const driftStates = ['RED', 'ORANGE', 'YELLOW', 'GREEN'];
+        const driftColors = {
+            RED: '#ef4444',
+            ORANGE: '#f97316',
+            YELLOW: '#eab308',
+            GREEN: '#22c55e'
+        };
+        const driftDescriptions = {
+            RED: 'Moving away from observer',
+            ORANGE: 'Static / no displacement',
+            YELLOW: 'Orthogonal movement',
+            GREEN: 'Moving toward observer'
+        };
+
+        let currentDriftIndex = 0;
+        let time = 0;
+
+        function updateDriftState() {
+            currentDriftIndex = Math.floor((time / 2000) % driftStates.length);
+            const state = driftStates[currentDriftIndex];
+            const color = driftColors[state];
+            const desc = driftDescriptions[state];
+
+            document.getElementById('driftLabel').textContent = state;
+            document.getElementById('driftInfo').textContent = desc;
+            document.getElementById('driftSwatch').style.backgroundColor = color;
+            document.getElementById('driftSwatch').style.boxShadow = `0 0 20px ${color}`;
+        }
+
+        function animate() {
+            time = Date.now();
+
+            // Background: Clear and draw slowly rotating sphere
+            bgCtx.fillStyle = 'rgba(15, 15, 31, 0.1)';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            sphere.rotateY(0.002);
+            sphere.rotateX(0.001);
+            sphere.drawWireframe(bgCtx);
+
+            // Foreground: Stars/particles
+            fgCtx.fillStyle = 'rgba(15, 15, 31, 0.05)';
+            fgCtx.fillRect(0, 0, fgCanvas.width, fgCanvas.height);
+
+            drawStarfield(fgCtx, time);
+
+            updateDriftState();
+
+            requestAnimationFrame(animate);
+        }
+
+        function drawStarfield(ctx, time) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const starCount = 50;
+
+            for (let i = 0; i < starCount; i++) {
+                const angle = (time * 0.0001 + i) % (Math.PI * 2);
+                const distance = 300 + Math.sin(time * 0.001 + i) * 50;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+
+                const size = 1 + Math.sin(time * 0.003 + i * 10) * 0.5;
+                const opacity = 0.3 + Math.sin(time * 0.002 + i * 5) * 0.5;
+
+                ctx.fillStyle = `rgba(102, 126, 234, ${opacity})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function toggleInfo() {
+            alert('MMUKO Fluid: A phenomenological drift system for real-time UI state classification and weighted graph visualization.');
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>

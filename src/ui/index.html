@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Drift Panel</title>
+    <title>MMUKO Fluid - Drift System Demo</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -24,33 +24,209 @@
         }
       }
 
-      a {
-        color: inherit;
-        text-decoration: none;
-                box-sizing: border-box;
-
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 1.5rem;
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        background: radial-gradient(circle at top, #e5e7eb 0%, #f3f4f6 40%, #f9fafb 100%);
+        padding: 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: var(--text);
       }
 
-      #app {
-        width: min(640px, 100%);
-        background: radial-gradient(circle at top, #1f2937, #030712);
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 3rem;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem;
+        font-weight: 700;
+      }
+
+      header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .drift-state {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+
+      .drift-swatch {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .drift-info {
+        flex: 1;
+      }
+
+      .drift-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .drift-desc {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-top: 0.25rem;
+      }
+
+      .control-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+      }
+
+      .value-display {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+      }
+
+      drift-panel {
+        margin-top: 1rem;
+      }
+
+      .footer {
+        text-align: center;
+        color: white;
+        font-size: 0.9rem;
+        margin-top: 3rem;
+        opacity: 0.8;
       }
     </style>
   </head>
   <body>
-    <main id="app" aria-live="polite"></main>
-    <drift-panel></drift-panel>
+    <div class="container">
+      <header>
+        <h1>🌀 MMUKO Fluid</h1>
+        <p>Weighted Graph Drift Classification System</p>
+      </header>
+
+      <div class="grid">
+        <!-- Drift Classification Demo -->
+        <div class="card">
+          <h2>Drift Classification</h2>
+
+          <div class="control-group">
+            <label>Observer Position (X)</label>
+            <input type="range" id="obsX" min="-10" max="10" value="0" step="0.5" />
+            <div class="value-display" id="obsXValue"></div>
+          </div>
+
+          <div class="control-group">
+            <label>Current Position (X)</label>
+            <input type="range" id="curX" min="-10" max="10" value="5" step="0.5" />
+            <div class="value-display" id="curXValue"></div>
+          </div>
+
+          <div class="control-group">
+            <label>Previous Position (X)</label>
+            <input type="range" id="prevX" min="-10" max="10" value="3" step="0.5" />
+            <div class="value-display" id="prevXValue"></div>
+          </div>
+
+          <div id="driftResult"></div>
+        </div>
+
+        <!-- Weighted Interpolation Demo -->
+        <div class="card">
+          <h2>Weighted Interpolation</h2>
+
+          <div class="control-group">
+            <label>Interpolation Factor (t)</label>
+            <input type="range" id="tFactor" min="0" max="1" value="0.5" step="0.01" />
+            <div class="value-display" id="tValue"></div>
+          </div>
+
+          <div class="control-group">
+            <label>Current Point (X, Y, Z)</label>
+            <div class="value-display" id="currentPoint">[0, 0, 0]</div>
+          </div>
+
+          <div class="control-group">
+            <label>Predicted Point (X, Y, Z)</label>
+            <div class="value-display" id="predictedPoint">[5, 5, 5]</div>
+          </div>
+
+          <div class="control-group">
+            <label>Interpolated Result</label>
+            <div class="value-display" id="interpolationResult">[0, 0, 0]</div>
+          </div>
+        </div>
+
+        <!-- Drift State Panel -->
+        <div class="card">
+          <h2>Live Drift State</h2>
+          <label style="display: flex; align-items: center; margin-bottom: 1rem;">
+            <input type="checkbox" id="autoUpdate" checked />
+            Auto-update
+          </label>
+          <drift-panel></drift-panel>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>MMUKO Fluid v0.1.0 • Phenomenological Drift System for OBINexus</p>
+      </div>
+    </div>
+
     <script type="module" src="./main.js"></script>
   </body>
 </html>
