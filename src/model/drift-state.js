@@ -1,11 +1,15 @@
-export const AWAY_RED = 'AWAY_RED';
-export const STATIC_ORANGE = 'STATIC_ORANGE';
-export const ORTHOGONAL_YELLOW = 'ORTHOGONAL_YELLOW';
-export const TOWARD_GREEN = 'TOWARD_GREEN';
+export const DriftState = Object.freeze({
+  STABLE: 'stable',
+  ACCELERATING: 'accelerating',
+  DECELERATING: 'decelerating',
+  CHAOTIC: 'chaotic',
+});
 
-export const DRIFT_STATES = Object.freeze([
-  AWAY_RED,
-  STATIC_ORANGE,
-  ORTHOGONAL_YELLOW,
-  TOWARD_GREEN,
-]);
+export const DriftStateColor = Object.freeze({
+  [DriftState.STABLE]: '#2ecc71',
+  [DriftState.ACCELERATING]: '#f1c40f',
+  [DriftState.DECELERATING]: '#3498db',
+  [DriftState.CHAOTIC]: '#e74c3c',
+});
+
+export const DriftStateList = Object.freeze(Object.values(DriftState));
