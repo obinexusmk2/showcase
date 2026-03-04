@@ -162,7 +162,9 @@ class DriftPanel extends HTMLElement {
   }
 }
 
-customElements.define('drift-panel', DriftPanel);
+if (!customElements.get('drift-panel')) {
+  customElements.define('drift-panel', DriftPanel);
+}
 
 function boot() {
   const app = document.querySelector('#app');

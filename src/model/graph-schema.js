@@ -172,12 +172,7 @@ function validateGraph(graph) {
   return { valid: errors.length === 0, errors };
 }
 
-module.exports = {
-  WEIGHT_CHANNELS,
-  validateNode,
-  validateEdge,
-  validateGraph
-};
+
 import { DriftStateList } from './drift-state.js';
 
 export const GraphSchema = Object.freeze({
@@ -190,3 +185,10 @@ export const GraphSchema = Object.freeze({
     ['chaotic', 'stable'],
   ].map(([source, target]) => ({ source, target })),
 });
+
+export  {
+  WEIGHT_CHANNELS,
+  validateNode,
+  validateEdge,
+  validateGraph
+};

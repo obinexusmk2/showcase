@@ -1,0 +1,34 @@
+{
+  "name": "mmuko-fluid",
+  "version": "0.1.0",
+  "description": "Weighted graph-based drift system for holographic interface state prediction and UI smoothing",
+  "type": "module",
+  "main": "dist/mmuko-fluid.cjs.js",
+  "types": "dist/mmuko-fluid.d.ts",
+  "module": "dist/mmuko-fluid.mjs",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "drift",
+    "graph",
+    "holographic",
+    "fluid",
+    "ui",
+    "interaction",
+    "state-machine"
+  ],
+  "author": "OBINexus",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "rollup": "^4.12.0",
+    "typescript": "^5.3.3",
+    "tslib": "^2.6.2"
+  },
+  "dependencies": {}
+}

@@ -99,10 +99,7 @@ function classifyMotion(observerPos, currentPos, nextPos, epsilon = 1e-6) {
   return MOTION_LABELS.STATIC;
 }
 
-module.exports = {
-  MOTION_LABELS,
-  classifyMotion,
-};
+
 import { DriftState } from './drift-state.js';
 
 export class MotionClassifier {
@@ -113,3 +110,9 @@ export class MotionClassifier {
     return DriftState.STABLE;
   }
 }
+
+export {
+  MOTION_LABELS,
+  classifyMotion,
+};
+

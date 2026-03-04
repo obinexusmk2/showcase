@@ -120,9 +120,7 @@ export const weightedBlend3D = (
     weightedBlend(current[2], predicted[2], wCurrent, wPredicted),
   ];
 };
-export function lerp(start, end, t) {
-  return start + (end - start) * t;
-}
+
 
 export function interpolateSeries(values, t) {
   if (!values.length) return 0;
