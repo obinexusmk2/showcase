@@ -1,0 +1,11 @@
+export const AWAY_RED = 'AWAY_RED';
+export const STATIC_ORANGE = 'STATIC_ORANGE';
+export const ORTHOGONAL_YELLOW = 'ORTHOGONAL_YELLOW';
+export const TOWARD_GREEN = 'TOWARD_GREEN';
+
+export const DRIFT_STATES = Object.freeze([
+  AWAY_RED,
+  STATIC_ORANGE,
+  ORTHOGONAL_YELLOW,
+  TOWARD_GREEN,
+]);
